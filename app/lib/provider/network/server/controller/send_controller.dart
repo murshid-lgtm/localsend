@@ -61,10 +61,14 @@ class SendController {
                   fileType: file.fileType,
                   hash: null,
                   preview: files.length == 1 && file.fileType == FileType.text ? createMessagePreview(file.bytes) : null,
-                  metadata: FileMetadata(
-                    lastModified: Platform.isWindows ? DateTime.now().toUtc().toIso8601String() : file.lastModified,
-                    lastAccessed: Platform.isWindows ? DateTime.now().toUtc().toIso8601String() : file.lastAccessed,
-                  ),
+                  metadata: Platform.isWindows
+                      ? FileMetadata(
+                          lastModified: DateTime.now().toUtc().toIso8601String(),
+                          lastAccessed: DateTime.now().toUtc().toIso8601String(),
+                        )
+                      : file.lastModified != null || file.lastAccessed != null
+                      ? FileMetadata(lastModified: file.lastModified, lastAccessed: file.lastAccessed)
+                      : null,
                 ),
                 asset: file.asset,
                 path: path,
