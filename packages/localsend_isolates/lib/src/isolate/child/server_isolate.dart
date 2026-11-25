@@ -738,7 +738,10 @@ Future<void> _handleFileUpload({
       // Overwrite it with the receiver's transfer-completion time.
       try {
         final received = File(target.path!);
-        await received.setLastModified(DateTime.now());
+        final completedAt = DateTime.now();
+        await received.setLastModified(completedAt);
+        // Dart's File API cannot set Windows creation time. Use PowerShell-compatible
+        // Win32 APIs only in a separate Windows-specific integration if required.
       } catch (e) {
         _logger.warning('Could not refresh received file modification time', e);
       }
