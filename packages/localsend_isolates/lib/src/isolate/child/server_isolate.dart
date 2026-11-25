@@ -740,8 +740,8 @@ Future<void> _handleFileUpload({
         final received = File(target.path!);
         final completedAt = DateTime.now();
         await received.setLastModified(completedAt);
-        // Dart's File API cannot set Windows creation time. Use PowerShell-compatible
-        // Win32 APIs only in a separate Windows-specific integration if required.
+        // Creation time on Windows is set by the OS when a new target is created.
+        // Existing targets reused during retries may retain their earlier creation time.
       } catch (e) {
         _logger.warning('Could not refresh received file modification time', e);
       }
