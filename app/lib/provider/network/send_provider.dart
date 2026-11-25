@@ -120,10 +120,11 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
                 hash: null,
                 // calculated below
                 preview: files.length == 1 && file.fileType == FileType.text ? createMessagePreview(file.bytes) : null,
-                metadata: FileMetadata(
-                  lastModified: defaultTargetPlatform == TargetPlatform.windows ? transferTimestamp : file.lastModified,
-                  lastAccessed: defaultTargetPlatform == TargetPlatform.windows ? transferTimestamp : file.lastAccessed,
-                ),
+                metadata: defaultTargetPlatform == TargetPlatform.windows
+                    ? FileMetadata(lastModified: transferTimestamp, lastAccessed: transferTimestamp)
+                    : file.lastModified != null || file.lastAccessed != null
+                    ? FileMetadata(lastModified: file.lastModified, lastAccessed: file.lastAccessed)
+                    : null,
               ),
               token: null,
               thumbnail: file.thumbnail,
