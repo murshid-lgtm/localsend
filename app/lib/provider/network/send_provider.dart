@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:localsend_app/model/cross_file.dart';
 import 'package:localsend_app/model/send_mode.dart';
@@ -95,6 +96,7 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
     final client = ref.read(httpProvider).pinnedTo(target.fingerprint);
     final sessionId = _uuid.v4();
     final createChecksums = ref.read(settingsProvider).createChecksums;
+    final transferTimestamp = DateTime.now().toUtc().toIso8601String();
 
     // The ids are assigned upfront, so the checksums calculated below
     // can be mapped back to the corresponding file.
@@ -119,11 +121,10 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
                 hash: null,
                 // calculated below
                 preview: files.length == 1 && file.fileType == FileType.text ? createMessagePreview(file.bytes) : null,
-                metadata: file.lastModified != null || file.lastAccessed != null
-                    ? FileMetadata(
-                        lastModified: file.lastModified,
-                        lastAccessed: file.lastAccessed,
-                      )
+                metadata: defaultTargetPlatform == TargetPlatform.windows
+                    ? FileMetadata(lastModified: transferTimestamp, lastAccessed: transferTimestamp)
+                    : file.lastModified != null || file.lastAccessed != null
+                    ? FileMetadata(lastModified: file.lastModified, lastAccessed: file.lastAccessed)
                     : null,
               ),
               token: null,

@@ -51,6 +51,7 @@ class SendController {
               path = tempPath;
             }
 
+            final transferTimestamp = DateTime.now().toUtc().toIso8601String();
             return MapEntry(
               id,
               WebDownloadFile(
@@ -61,11 +62,13 @@ class SendController {
                   fileType: file.fileType,
                   hash: null,
                   preview: files.length == 1 && file.fileType == FileType.text ? createMessagePreview(file.bytes) : null,
-                  metadata: file.lastModified != null || file.lastAccessed != null
+                  metadata: Platform.isWindows
                       ? FileMetadata(
-                          lastModified: file.lastModified,
-                          lastAccessed: file.lastAccessed,
+                          lastModified: transferTimestamp,
+                          lastAccessed: transferTimestamp,
                         )
+                      : file.lastModified != null || file.lastAccessed != null
+                      ? FileMetadata(lastModified: file.lastModified, lastAccessed: file.lastAccessed)
                       : null,
                 ),
                 asset: file.asset,

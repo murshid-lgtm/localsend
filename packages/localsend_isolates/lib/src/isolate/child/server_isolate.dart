@@ -733,6 +733,20 @@ Future<void> _handleFileUpload({
       }
     }
 
+    if (Platform.isWindows && !shouldSaveToGallery && target.path != null) {
+      // Rust has finished writing and may have restored the sender's original modification time.
+      // Overwrite it with the receiver's transfer-completion time.
+      try {
+        final received = File(target.path!);
+        final completedAt = DateTime.now();
+        await received.setLastModified(completedAt);
+        // Creation time on Windows is set by the OS when a new target is created.
+        // Existing targets reused during retries may retain their earlier creation time.
+      } catch (e) {
+        _logger.warning('Could not refresh received file modification time', e);
+      }
+    }
+
     _logger.info('Saved ${dartFile.fileName}.');
     emit(
       HttpServerFileUploadResultEvent(
