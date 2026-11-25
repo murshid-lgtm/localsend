@@ -95,6 +95,7 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
     final client = ref.read(httpProvider).pinnedTo(target.fingerprint);
     final sessionId = _uuid.v4();
     final createChecksums = ref.read(settingsProvider).createChecksums;
+    final transferTimestamp = DateTime.now().toUtc().toIso8601String();
 
     // The ids are assigned upfront, so the checksums calculated below
     // can be mapped back to the corresponding file.
@@ -119,12 +120,10 @@ class SendNotifier extends Notifier<Map<String, SendSessionState>> {
                 hash: null,
                 // calculated below
                 preview: files.length == 1 && file.fileType == FileType.text ? createMessagePreview(file.bytes) : null,
-                metadata: file.lastModified != null || file.lastAccessed != null
-                    ? FileMetadata(
-                        lastModified: file.lastModified,
-                        lastAccessed: file.lastAccessed,
-                      )
-                    : null,
+                metadata: FileMetadata(
+                  lastModified: defaultTargetPlatform == TargetPlatform.windows ? transferTimestamp : file.lastModified,
+                  lastAccessed: defaultTargetPlatform == TargetPlatform.windows ? transferTimestamp : file.lastAccessed,
+                ),
               ),
               token: null,
               thumbnail: file.thumbnail,
